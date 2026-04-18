@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: iris-core
+Version: 0.1.0
+Summary: Shared event contract for the IRIS incident intelligence ecosystem
+Author: Sai Sampath Ayalasomayajula
+Requires-Python: >=3.9

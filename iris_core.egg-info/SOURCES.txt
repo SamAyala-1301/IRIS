@@ -1,0 +1,10 @@
+README.md
+setup.py
+iris_core/__init__.py
+iris_core/event.py
+iris_core/schema.sql
+iris_core/store.py
+iris_core.egg-info/PKG-INFO
+iris_core.egg-info/SOURCES.txt
+iris_core.egg-info/dependency_links.txt
+iris_core.egg-info/top_level.txt

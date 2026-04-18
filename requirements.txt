@@ -1,0 +1,3 @@
+# iris-core has no runtime dependencies — stdlib only
+# Dev dependencies:
+pytest>=7.0
