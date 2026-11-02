@@ -1,0 +1,2 @@
+kubernetes>=28.1.0
+iris-core @ file:///Users/sam1301/Documents/Project%20Work/IRIS-Core

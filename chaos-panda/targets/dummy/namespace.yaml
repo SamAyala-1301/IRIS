@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chaospanda-apps
+  labels:
+    name: chaospanda-apps
+    monitoring: enabled
