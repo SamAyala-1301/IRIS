@@ -1,0 +1,57 @@
+{
+  "dashboard": {
+    "title": "Service Dependency Map",
+    "tags": ["architecture", "dependencies"],
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Map",
+        "type": "nodeGraph",
+        "targets": [
+          {
+            "expr": "sum(rate(flask_http_request_total[5m])) by (job)"
+          }
+        ],
+        "gridPos": {"h": 16, "w": 24, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Request Flow",
+        "type": "sankey",
+        "targets": [
+          {
+            "expr": "sum(rate(flask_http_request_total{job=~\"auth_service|payment_service|inventory_service\"}[5m])) by (job, status)"
+          }
+        ],
+        "gridPos": {"h": 12, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 3,
+        "title": "Service Health Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "up{job=~\".*_service\"}"
+          }
+        ],
+        "gridPos": {"h": 12, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 4,
+        "title": "Inter-Service Latency",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m])) by (job) * 1000"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms"
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 28}
+      }
+    ]
+  }
+}

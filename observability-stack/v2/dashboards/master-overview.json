@@ -1,0 +1,82 @@
+{
+  "dashboard": {
+    "title": "Master Overview",
+    "tags": ["overview"],
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health",
+        "type": "row",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Service Availability",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=~\".*_service\"}"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 1}
+      },
+      {
+        "id": 3,
+        "title": "Total Requests/sec",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(flask_http_request_total[1m]))"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 1}
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(flask_http_request_total{status=~\"5..\"}[5m])) / sum(rate(flask_http_request_total[5m])) * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 5, "color": "red"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 1}
+      },
+      {
+        "id": 5,
+        "title": "Cache Hit Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m])) * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 70, "color": "yellow"},
+                {"value": 90, "color": "green"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 1}
+      }
+    ]
+  }
+}

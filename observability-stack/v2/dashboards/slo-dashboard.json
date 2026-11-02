@@ -1,0 +1,124 @@
+{
+  "dashboard": {
+    "title": "SLO Dashboard",
+    "tags": ["slo", "sre"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Auth Service - Current SLO",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "auth:availability:ratio * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 99.5, "color": "yellow"},
+                {"value": 99.9, "color": "green"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Payment Service - Current SLO",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "payment:availability:ratio * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 99.5, "color": "yellow"},
+                {"value": 99.9, "color": "green"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Error Budget Remaining (Auth)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "auth:error_budget:remaining * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Error Budget Remaining (Payment)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "payment:error_budget:remaining * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Burn Rate (1h window)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "auth:error_budget:burn_rate_1h",
+            "legendFormat": "Auth"
+          },
+          {
+            "expr": "payment:error_budget:burn_rate_1h",
+            "legendFormat": "Payment"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 6,
+        "title": "Service Latency (p95)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "auth:latency:p95 * 1000",
+            "legendFormat": "Auth"
+          },
+          {
+            "expr": "payment:latency:p95 * 1000",
+            "legendFormat": "Payment"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      }
+    ]
+  }
+}

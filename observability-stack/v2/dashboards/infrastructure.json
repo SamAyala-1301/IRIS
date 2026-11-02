@@ -1,0 +1,106 @@
+{
+  "dashboard": {
+    "title": "Infrastructure Overview",
+    "tags": ["infrastructure", "system"],
+    "panels": [
+      {
+        "id": 1,
+        "title": "Container CPU Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~\".*_service\"}[5m]) * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Container Memory Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=~\".*_service\"} / 1024 / 1024"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "MB"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Redis Memory",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes / redis_memory_max_bytes * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 70, "color": "yellow"},
+                {"value": 90, "color": "red"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "PostgreSQL Connections",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"transactions\"}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "RabbitMQ Queue Depth",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rabbitmq_queue_messages{queue=\"payment_events\"}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Network Traffic",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(container_network_transmit_bytes_total[5m])",
+            "legendFormat": "TX - {{container_label_com_docker_compose_service}}"
+          },
+          {
+            "expr": "rate(container_network_receive_bytes_total[5m])",
+            "legendFormat": "RX - {{container_label_com_docker_compose_service}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "Bps"
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16}
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+groups:
+  - name: slo_rules
+    interval: 30s
+    rules:
+      # Auth Service SLIs
+      - record: auth:availability:ratio
+        expr: |
+          sum(rate(flask_http_request_total{job="auth_service",status=~"2.."}[5m]))
+          /
+          sum(rate(flask_http_request_total{job="auth_service"}[5m]))
+
+      - record: auth:latency:p95
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(flask_http_request_duration_seconds_bucket{job="auth_service"}[5m])) by (le)
+          )
+
+      # Payment Service SLIs
+      - record: payment:availability:ratio
+        expr: |
+          sum(rate(flask_http_request_total{job="payment_service",status=~"2.."}[5m]))
+          /
+          sum(rate(flask_http_request_total{job="payment_service"}[5m]))
+
+      - record: payment:latency:p95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(flask_http_request_duration_seconds_bucket{job="payment_service"}[5m])) by (le)
+          )
+
+      # Inventory Service SLIs
+      - record: inventory:availability:ratio
+        expr: |
+          sum(rate(flask_http_request_total{job="inventory_service",status=~"2.."}[5m]))
+          /
+          sum(rate(flask_http_request_total{job="inventory_service"}[5m]))
+
+      # Error Budget Calculations (30-day window)
+      - record: auth:error_budget:remaining
+        expr: |
+          (1 - 0.999) - (1 - avg_over_time(auth:availability:ratio[30d]))
+
+      - record: payment:error_budget:remaining
+        expr: |
+          (1 - 0.999) - (1 - avg_over_time(payment:availability:ratio[30d]))
+
+      # Burn Rate (1 hour window)
+      - record: auth:error_budget:burn_rate_1h
+        expr: |
+          (1 - avg_over_time(auth:availability:ratio[1h])) / (1 - 0.999)
+
+      - record: payment:error_budget:burn_rate_1h
+        expr: |
+          (1 - avg_over_time(payment:availability:ratio[1h])) / (1 - 0.999)

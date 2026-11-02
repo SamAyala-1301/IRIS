@@ -1,0 +1,108 @@
+{
+  "dashboard": {
+    "title": "Business Metrics",
+    "tags": ["business", "revenue"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Revenue",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "business_revenue_total_dollars"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Active Users",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "auth_active_sessions"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Revenue Over Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "business_revenue_total_dollars"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Payment Success Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(payment_transactions_total{status=\"success\"}[5m]) / rate(payment_transactions_total[5m]) * 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Payments Per Minute",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(payment_transactions_total[1m]) * 60"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Average Transaction Size",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(payment_amount_total_cents[5m]) / rate(payment_transactions_total{status=\"success\"}[5m]) / 100"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Top Products by Sales",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(5, sum by (product_id) (rate(inventory_sales_total[1h])))",
+            "format": "table"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 16}
+      }
+    ]
+  }
+}

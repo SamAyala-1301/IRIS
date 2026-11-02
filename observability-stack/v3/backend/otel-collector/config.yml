@@ -1,0 +1,138 @@
+# OpenTelemetry Collector Configuration for ObsStack V3
+# Receives telemetry from instrumented applications
+
+receivers:
+  # OTLP receiver for traces, metrics, and logs
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "*"
+
+  # Prometheus receiver for pulling metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['localhost:8888']
+
+processors:
+  # Batch processor for better performance
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # Resource detection for better context
+  resourcedetection:
+    detectors: [env, system, docker]
+    timeout: 5s
+
+  # Attributes processor to add/modify attributes
+  attributes:
+    actions:
+      - key: obs_stack.version
+        value: "3.0.0"
+        action: insert
+      - key: deployment.environment
+        value: "development"
+        action: insert
+
+  # Filter processor to remove sensitive data
+  filter:
+    metrics:
+      exclude:
+        match_type: regexp
+        metric_names:
+          - ".*password.*"
+          - ".*secret.*"
+          - ".*token.*"
+
+exporters:
+  # Prometheus exporter for metrics
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: obs_stack
+    const_labels:
+      collector: "obs-stack-v3"
+
+  # OTLP exporter to Tempo for traces
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # Loki exporter for logs
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      resource:
+        service.name: "service_name"
+        service.framework: "framework"
+
+  # Logging exporter for debugging
+  logging:
+    loglevel: info
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # File exporter for backup
+  file:
+    path: /tmp/otel-collector-data.json
+    rotation:
+      max_megabytes: 100
+      max_days: 7
+      max_backups: 3
+
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+  # Performance profiler
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # Zpages for debugging
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+  
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resourcedetection, attributes]
+      exporters: [otlp/tempo, logging]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch, resourcedetection, attributes, filter]
+      exporters: [prometheus, logging]
+
+    # Logs pipeline
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resourcedetection, attributes]
+      exporters: [loki, logging]
+
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      level: detailed
+      address: 0.0.0.0:8888

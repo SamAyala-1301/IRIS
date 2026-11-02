@@ -1,0 +1,178 @@
+# ObsStack Alert Rules
+groups:
+  - name: obsstack_application_alerts
+    interval: 30s
+    rules:
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(flask_http_request_total{status=~"5.."}[5m]) 
+            or 
+            rate(http_request_duration_ms_count{status_code=~"5.."}[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "High error rate detected"
+          description: "{{ $labels.service }} has error rate of {{ $value | humanizePercentage }} over the last 5 minutes"
+      
+      # Critical Error Rate
+      - alert: CriticalErrorRate
+        expr: |
+          (
+            rate(flask_http_request_total{status=~"5.."}[5m]) 
+            or 
+            rate(http_request_duration_ms_count{status_code=~"5.."}[5m])
+          ) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "CRITICAL: Very high error rate"
+          description: "{{ $labels.service }} has error rate of {{ $value | humanizePercentage }}"
+      
+      # High Response Time
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            rate(flask_http_request_duration_seconds_bucket[5m])
+            or
+            rate(http_request_duration_ms_bucket[5m]) / 1000
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "High response time detected"
+          description: "{{ $labels.service }} p95 response time is {{ $value }}s"
+      
+      # Application Down
+      - alert: ApplicationDown
+        expr: |
+          up{job=~"flask|express|django|fastapi"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: availability
+        annotations:
+          summary: "Application is down"
+          description: "{{ $labels.job }} ({{ $labels.instance }}) is not responding"
+      
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            process_resident_memory_bytes / 1024 / 1024 / 1024
+            or
+            nodejs_heap_size_used_bytes / 1024 / 1024 / 1024
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+          component: resources
+        annotations:
+          summary: "High memory usage"
+          description: "{{ $labels.service }} is using {{ $value }}GB of memory"
+      
+      # Event Loop Lag (Node.js)
+      - alert: HighEventLoopLag
+        expr: nodejs_eventloop_lag_seconds > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "High event loop lag in Node.js"
+          description: "{{ $labels.service }} event loop lag is {{ $value }}s"
+      
+      # Request Rate Spike
+      - alert: RequestRateSpike
+        expr: |
+          (
+            rate(flask_http_request_total[5m])
+            or
+            rate(http_request_duration_ms_count[5m])
+          ) > 
+          (
+            avg_over_time(
+              (rate(flask_http_request_total[5m])
+              or
+              rate(http_request_duration_ms_count[5m]))[1h:]
+            ) * 2
+          )
+        for: 5m
+        labels:
+          severity: info
+          component: traffic
+        annotations:
+          summary: "Request rate spike detected"
+          description: "{{ $labels.service }} request rate is {{ $value }} req/s (2x normal)"
+
+  - name: obsstack_infrastructure_alerts
+    interval: 30s
+    rules:
+      # Prometheus Down
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: monitoring
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus has been down for more than 1 minute"
+      
+      # High Prometheus Disk Usage
+      - alert: PrometheusDiskUsageHigh
+        expr: |
+          (
+            1 - (
+              prometheus_tsdb_storage_blocks_bytes / 
+              prometheus_tsdb_retention_limit_bytes
+            )
+          ) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: storage
+        annotations:
+          summary: "Prometheus disk space running low"
+          description: "Only {{ $value | humanizePercentage }} disk space remaining"
+      
+      # OTEL Collector Issues
+      - alert: OTELCollectorDroppedSpans
+        expr: rate(otelcol_processor_dropped_spans[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: telemetry
+        annotations:
+          summary: "OTEL Collector dropping spans"
+          description: "{{ $value }} spans/sec are being dropped"
+      
+      # Grafana Down
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: monitoring
+        annotations:
+          summary: "Grafana is down"
+          description: "Grafana dashboard is not accessible"
+      
+      # Loki Issues
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: logging
+        annotations:
+          summary: "Loki is down"
+          description: "Log aggregation is not working"

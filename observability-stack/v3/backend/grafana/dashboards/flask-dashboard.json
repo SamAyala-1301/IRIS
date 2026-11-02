@@ -1,0 +1,168 @@
+{
+  "dashboard": {
+    "title": "Flask Application Metrics",
+    "tags": ["obsstack", "flask", "python"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(flask_http_request_total{job=\"flask\"}[5m])",
+            "legendFormat": "{{method}} {{path}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Response Time (p95)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 {{path}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(flask_http_request_total{status=~\"5..\"}[5m])",
+            "legendFormat": "{{status}} {{path}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Errors/sec"},
+          {"format": "short"}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [0.1], "type": "gt"},
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "name": "High Error Rate"
+        }
+      },
+      {
+        "id": 4,
+        "title": "Active Requests",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 8, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "flask_http_request_in_progress"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "textMode": "auto"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Total Requests",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 8, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(flask_http_request_total)"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Request Duration Heatmap",
+        "type": "heatmap",
+        "gridPos": {"x": 0, "y": 16, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(flask_http_request_duration_seconds_bucket[5m])",
+            "format": "heatmap",
+            "legendFormat": "{{le}}"
+          }
+        ],
+        "yAxis": {
+          "format": "s"
+        }
+      },
+      {
+        "id": 7,
+        "title": "Top Endpoints by Traffic",
+        "type": "bargauge",
+        "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "topk(10, sum by (path) (rate(flask_http_request_total[5m])))"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Response Status Distribution",
+        "type": "piechart",
+        "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (status) (flask_http_request_total)"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 32, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes{job=\"flask\"}",
+            "legendFormat": "RSS"
+          }
+        ],
+        "yaxes": [
+          {"format": "bytes"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 10,
+        "title": "CPU Usage",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 32, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total{job=\"flask\"}[5m])",
+            "legendFormat": "CPU"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit"},
+          {"format": "short"}
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

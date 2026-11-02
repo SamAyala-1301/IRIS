@@ -1,0 +1,20 @@
+groups:
+  - name: flask_api_test_alerts
+    rules:
+      - alert: HighLatency
+        expr: flask_http_request_duration_seconds_sum / flask_http_request_duration_seconds_count > 0.01
+        for: 5s
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency detected (test)"
+          description: "API request latency is above 10ms for 5 seconds"
+
+      - alert: HighErrorRate
+        expr: flask_http_request_exceptions_total > 0
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "High API error rate detected (test)"
+          description: "API is returning exceptions for 5 seconds"

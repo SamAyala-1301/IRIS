@@ -1,0 +1,49 @@
+groups:
+  - name: flask_api_alerts
+    rules:
+      - alert: HighLatency
+        expr: flask_http_request_duration_seconds_sum / flask_http_request_duration_seconds_count > 0.2
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency detected"
+          description: "API request latency is above 200ms for 1 min"
+
+      - alert: HighErrorRate
+        expr: flask_http_request_exceptions_total > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High API error rate detected"
+          description: "API is returning exceptions"
+  
+
+  - name: slo_alerts
+    rules:
+      - alert: ErrorBudgetBurnRateHigh
+        expr: |
+          (
+            auth:error_budget:burn_rate_1h > 14.4
+            or
+            payment:error_budget:burn_rate_1h > 14.4
+          )
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error budget burn rate detected"
+          description: "Service is burning through error budget too quickly (>14.4x normal rate)"
+
+      - alert: ErrorBudgetExhausted
+        expr: |
+          auth:error_budget:remaining < 0
+          or
+          payment:error_budget:remaining < 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error budget exhausted"
+          description: "Service has exhausted its monthly error budget"

@@ -1,0 +1,86 @@
+
+cat > /tmp/test_e2e.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "🧪 Testing End-to-End Flow"
+
+# 1. Register
+echo "1️⃣ Registering user..."
+REGISTER=$(curl -s -X POST http://localhost/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test_'$(date +%s)'", "password":"test123"}')
+
+USER_ID=$(echo $REGISTER | jq -r '.user_id')
+USERNAME=$(echo $REGISTER | jq -r '.username')
+
+if [ "$USER_ID" = "null" ]; then
+  echo "❌ Registration failed"
+  echo $REGISTER
+  exit 1
+fi
+echo "✅ User registered: $USERNAME"
+
+# 2. Login
+echo "2️⃣ Logging in..."
+TOKEN=$(curl -s -X POST http://localhost/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d "{\"username\":\"$USERNAME\", \"password\":\"test123\"}" \
+  | jq -r '.token')
+
+if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+  echo "❌ Login failed"
+  exit 1
+fi
+echo "✅ Token obtained: ${TOKEN:0:20}..."
+
+# 3. Make Payment
+echo "3️⃣ Making payment..."
+PAYMENT=$(curl -s -X POST http://localhost/api/v1/payment/charge \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 99.99}')
+
+PAYMENT_ID=$(echo $PAYMENT | jq -r '.payment_id')
+
+if [ "$PAYMENT_ID" = "null" ]; then
+  echo "❌ Payment failed"
+  echo $PAYMENT
+  exit 1
+fi
+echo "✅ Payment processed: #$PAYMENT_ID"
+
+# 4. Get Products
+echo "4️⃣ Getting products..."
+PRODUCTS=$(curl -s http://localhost/api/v1/inventory/products)
+COUNT=$(echo $PRODUCTS | jq -r '.products | length')
+
+if [ "$COUNT" -gt 0 ]; then
+  echo "✅ Products loaded: $COUNT items"
+else
+  echo "❌ No products found"
+  exit 1
+fi
+
+# 5. Reserve Stock
+echo "5️⃣ Reserving stock..."
+RESERVE=$(curl -s -X POST http://localhost/api/v1/inventory/product/1/reserve \
+  -H "Content-Type: application/json" \
+  -d '{"quantity": 1}')
+
+RESERVED=$(echo $RESERVE | jq -r '.reserved')
+
+if [ "$RESERVED" = "1" ]; then
+  echo "✅ Stock reserved"
+else
+  echo "❌ Stock reservation failed"
+  echo $RESERVE
+  exit 1
+fi
+
+echo ""
+echo "🎉 All tests passed!"
+EOF
+
+chmod +x /tmp/test_e2e.sh
+/tmp/test_e2e.sh

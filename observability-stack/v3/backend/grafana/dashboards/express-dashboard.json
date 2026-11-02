@@ -1,0 +1,164 @@
+{
+  "dashboard": {
+    "title": "Express.js Application Metrics",
+    "tags": ["obsstack", "express", "nodejs"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Throughput",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(http_request_duration_ms_count{job=\"express\"}[5m])",
+            "legendFormat": "{{method}} {{route}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Response Time (Percentiles)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_ms_bucket[5m]))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_ms_bucket[5m]))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_ms_bucket[5m]))",
+            "legendFormat": "p99"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Duration"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "HTTP Status Codes",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(http_request_duration_ms_count{status_code=~\"2..\"}[5m])",
+            "legendFormat": "2xx Success"
+          },
+          {
+            "expr": "rate(http_request_duration_ms_count{status_code=~\"4..\"}[5m])",
+            "legendFormat": "4xx Client Error"
+          },
+          {
+            "expr": "rate(http_request_duration_ms_count{status_code=~\"5..\"}[5m])",
+            "legendFormat": "5xx Server Error"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Event Loop Lag",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "nodejs_eventloop_lag_seconds{job=\"express\"}",
+            "legendFormat": "Event Loop Lag"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Lag"},
+          {"format": "short"}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [0.1], "type": "gt"},
+              "query": {"params": ["A", "5m", "now"]},
+              "type": "query"
+            }
+          ],
+          "name": "High Event Loop Lag"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Heap Memory Usage",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "nodejs_heap_size_used_bytes{job=\"express\"}",
+            "legendFormat": "Used"
+          },
+          {
+            "expr": "nodejs_heap_size_total_bytes{job=\"express\"}",
+            "legendFormat": "Total"
+          }
+        ],
+        "yaxes": [
+          {"format": "bytes"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Active Handles & Requests",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "nodejs_active_handles_total{job=\"express\"}",
+            "legendFormat": "Active Handles"
+          },
+          {
+            "expr": "nodejs_active_requests_total{job=\"express\"}",
+            "legendFormat": "Active Requests"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "GC Duration",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(nodejs_gc_duration_seconds_sum[5m])",
+            "legendFormat": "GC Time"
+          }
+        ],
+        "yaxes": [
+          {"format": "s"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Request Rate by Route",
+        "type": "table",
+        "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sort_desc(sum by (route, method) (rate(http_request_duration_ms_count[5m])))",
+            "format": "table",
+            "instant": true
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}
