@@ -1,0 +1,22 @@
+# Don't upload these to Vercel
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+venv/
+.vscode/
+.idea/
+.DS_Store
+*.log
+dashboards/
+scripts/
+README.md
+DEPLOYMENT.md
+tests/

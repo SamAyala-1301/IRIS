@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/enrich.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/enrich",
+      "dest": "api/enrich.py",
+      "methods": ["POST", "GET"]
+    }
+  ]
+}
