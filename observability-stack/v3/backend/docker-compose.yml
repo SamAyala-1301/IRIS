@@ -66,7 +66,7 @@ services:
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/home-dashboard.json
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./grafana/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
     ports:
@@ -134,6 +134,25 @@ services:
       - ./alertmanager/config.yml:/etc/alertmanager/config.yml
     ports:
       - "9093:9093"
+    networks:
+      - obs-stack
+    restart: unless-stopped
+
+  # Read-only exporter for shared IrisStore events and RCA classifications
+  iris-events-exporter:
+    build:
+      context: ./iris-exporter
+    container_name: iris-events-exporter
+    environment:
+      IRIS_DB_PATH: /var/lib/iris/iris.db
+      IRIS_EXPORTER_PORT: "8002"
+    volumes:
+      - type: bind
+        source: ${IRIS_HOME:-${HOME}/.iris}
+        target: /var/lib/iris
+        read_only: true
+        bind:
+          create_host_path: false
     networks:
       - obs-stack
     restart: unless-stopped

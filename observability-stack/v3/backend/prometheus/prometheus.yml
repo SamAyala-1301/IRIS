@@ -90,8 +90,21 @@ scrape_configs:
         labels:
           service: 'tempo'
 
-# Storage configuration
-storage:
-  tsdb:
-    path: /prometheus
-    retention.time: 15d
+  # ChaosPanda chaos engine — IRIS ecosystem metrics
+  - job_name: 'chaospanda'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['host.docker.internal:8001']
+        labels:
+          service: 'chaospanda'
+          component: 'chaos-engine'
+          iris_ecosystem: 'true'
+
+  # Read-only aggregates from the shared IrisStore SQLite database
+  - job_name: 'iris-event-store'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['iris-events-exporter:8002']
+        labels:
+          service: 'iris-event-store'
+          iris_ecosystem: 'true'

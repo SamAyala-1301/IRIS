@@ -7,9 +7,34 @@ import json
 import datetime
 import uuid
 import sys
+import os
+
+from prometheus_client import Counter, Histogram, start_http_server
+import threading
 
 from .k8s import load_cluster, count_ready, get_running_pods, kill_pod
 from .db  import init_db, write_incident, print_last_incident
+
+_metrics_server_started = False
+_metrics_lock = threading.Lock()
+
+EXPERIMENTS_TOTAL = Counter(
+    "chaospanda_experiments_total",
+    "Total number of chaos experiments run",
+    ["status"],
+)
+
+TTD_SECONDS = Histogram(
+    "chaospanda_ttd_seconds",
+    "Time to Detect — seconds from fault injection to IrisEvent creation",
+    buckets=[1, 2, 5, 10, 20, 30, 60, 120],
+)
+
+TTR_SECONDS = Histogram(
+    "chaospanda_ttr_seconds",
+    "Time to Recover — seconds from fault injection to pod Ready again",
+    buckets=[5, 10, 20, 30, 60, 120, 300, 600],
+)
 
 DEFAULTS = {
     "deployment"  : "chaos-target",
@@ -51,7 +76,21 @@ def iris_hook(experiment_id, deployment, namespace, pod_killed, ttd, ttr, status
         print(f"[IRIS]   Skipped — {e}")
 
 
+def _start_metrics_server(port=None) -> None:
+    """Start Prometheus HTTP server exactly once. Safe to call repeatedly."""
+    global _metrics_server_started
+    if port is None:
+        # Port 8000 is used by the SRE-P exporter in the IRIS development stack.
+        port = int(os.environ.get("CHAOSPANDA_METRICS_PORT", "8001"))
+    with _metrics_lock:
+        if not _metrics_server_started:
+            start_http_server(port)
+            _metrics_server_started = True
+            print(f"[IRIS] Prometheus metrics available at http://localhost:{port}/metrics")
+
+
 def run_experiment(args):
+    _start_metrics_server()
     v1 = load_cluster()
 
     experiment_id = str(uuid.uuid4())[:8]
@@ -77,6 +116,7 @@ def run_experiment(args):
     # 2 — kill a random pod
     pods       = get_running_pods(v1, args.namespace, args.deployment)
     target_pod = random.choice(pods)
+    fault_start_time = datetime.datetime.utcnow()
     kill_pod(v1, target_pod)
     kill_time  = time.time()
     events.append({
@@ -97,6 +137,8 @@ def run_experiment(args):
 
         if ready < args.replicas:
             ttd = elapsed
+            ttd_seconds = (datetime.datetime.utcnow() - fault_start_time).total_seconds()
+            TTD_SECONDS.observe(ttd_seconds)
             print(f"[DETECT] Degradation caught — TTD: {ttd}s")
             events.append({
                 "t"              : round(time.time() - start_time, 2),
@@ -118,6 +160,7 @@ def run_experiment(args):
             con.close()
             iris_hook(experiment_id, args.deployment, args.namespace,
                       target_pod.metadata.name, None, None, "no_degradation")
+            EXPERIMENTS_TOTAL.labels(status="failed").inc()
             return
 
     # 4 — poll for recovery
@@ -134,6 +177,8 @@ def run_experiment(args):
                   f"streak={streak}/{DEFAULTS['streak']}")
             if streak >= DEFAULTS["streak"]:
                 ttr = elapsed
+                ttr_seconds = (datetime.datetime.utcnow() - fault_start_time).total_seconds()
+                TTR_SECONDS.observe(ttr_seconds)
                 print(f"[RECOVER] Confirmed — TTR: {ttr}s")
                 events.append({
                     "t"          : round(time.time() - start_time, 2),
@@ -164,3 +209,4 @@ def run_experiment(args):
     # 6 — emit IrisEvent to shared store
     iris_hook(experiment_id, args.deployment, args.namespace,
               target_pod.metadata.name, ttd, ttr, "completed")
+    EXPERIMENTS_TOTAL.labels(status="success").inc()

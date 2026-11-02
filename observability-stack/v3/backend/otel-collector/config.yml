@@ -76,10 +76,6 @@ exporters:
   # Loki exporter for logs
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
-    labels:
-      resource:
-        service.name: "service_name"
-        service.framework: "framework"
 
   # Logging exporter for debugging
   logging:

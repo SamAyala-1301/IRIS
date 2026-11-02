@@ -1,14 +1,44 @@
-# 🔍 RCA-GPT
+# RCA-GPT 🔍
 
-**AI-Powered Root Cause Analysis for Support Engineers**
+**Root Cause Analysis for Support Engineers**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+Part of the IRIS Incident Intelligence Ecosystem — where chaos experiments, incident classification, enrichment, and observability all share a common data layer.
 
-Automatically detect, classify, and analyze production incidents using machine learning. Find similar historical incidents, discover recurring patterns, and get AI-powered resolution suggestions.
+---
 
-![RCA-GPT Dashboard](docs/images/dashboard.png)
+## 🔗 IRIS Integration
+
+RCA-GPT acts as the **classification engine** in the IRIS ecosystem.
+
+It reads structured events emitted by ChaosPanda, classifies them using ML (TF-IDF + Logistic Regression), and writes the classification back to the shared IRIS store.
+
+### Run IRIS bridge
+
+```bash
+# Classify all pending events
+python -m rca_gpt.bridge
+
+# Watch mode (continuous polling)
+python -m rca_gpt.bridge --watch
+```
+
+### Data Flow
+
+ChaosPanda → emits IrisEvent → `~/.iris/iris.db`<br>
+↓<br>
+RCA-GPT bridge → polls unclassified events<br>
+↓<br>
+ML classifier → predicts incident type + confidence<br>
+↓<br>
+Updates IRIS store<br>
+↓<br>
+CIIA + Observability Stack consume enriched events
+
+### ⚠️ Model Note
+
+The current classifier is trained on application logs (`Auth Error`, `Timeout`, `DB Error`).
+
+When used on chaos experiment signals (TTD/TTR), confidence may be lower (~50%). This is expected — retraining with chaos experiment data improves accuracy without changing architecture.
 
 ---
 
@@ -229,10 +259,10 @@ Edit `config/config.yaml`:
 monitoring:
   check_interval_seconds: 60
   error_threshold: 3
-  
+<br>
 database:
   path: data/incidents.db
-  
+<br>
 ml:
   confidence_threshold: 0.7
 ```

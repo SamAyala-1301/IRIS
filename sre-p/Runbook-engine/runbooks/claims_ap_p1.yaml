@@ -1,0 +1,120 @@
+name: Claims API P1 Incident Response
+version: "1.0"
+description: >
+  Automated P1 runbook for claims-api availability degradation.
+  Checks health, queries Prometheus for error rate, greps container
+  logs for root cause signals, attempts restart if needed, then notifies.
+
+# Variables available to all steps via {{variable_name}} syntax
+variables:
+  service: claims-api
+  prometheus_url: http://localhost:9090
+  container_name: insurance-metrics-exporter
+
+steps:
+
+  - name: check_claims_api_health
+    type: http_check
+    url: http://localhost:8000/metrics
+    expect_status: 200
+    expect_body_contains: "slo_availability_ratio"
+    timeout_seconds: 5
+    on_fail: goto:grep_container_logs
+    on_pass: next
+    description: "Verify claims-api metrics endpoint is reachable"
+
+  - name: query_error_rate
+    type: prometheus_query
+    url: "{{prometheus_url}}"
+    query: 'slo_error_rate{service="claims-api"}'
+    condition: gt
+    threshold: 0.01
+    capture_as: claims_error_rate
+    on_fail: goto:grep_container_logs
+    on_pass: next
+    description: "Check if error rate exceeds 1% SLO threshold"
+
+  - name: query_burn_rate
+    type: prometheus_query
+    url: "{{prometheus_url}}"
+    query: 'slo_burn_rate{service="claims-api"}'
+    condition: gt
+    threshold: 5
+    capture_as: claims_burn_rate
+    on_fail: continue
+    on_pass: next
+    description: "Check if burn rate exceeds 5x — indicates fast budget drain"
+
+  - name: grep_container_logs
+    type: log_grep
+    source: docker
+    target: "{{container_name}}"
+    pattern: "ERROR|Exception|FATAL|timeout|connection refused"
+    last_lines: 100
+    capture_as: error_log_lines
+    on_fail: continue
+    on_pass: next
+    description: "Scan container logs for error signals"
+
+  - name: check_prometheus_scrape
+    type: shell
+    command: >
+      curl -s http://localhost:9090/api/v1/targets
+      | python3 -c "import sys,json; t=json.load(sys.stdin);
+      targets=[x for x in t['data']['activeTargets']
+      if 'insurance' in x.get('labels',{}).get('job','')];
+      print('UP' if all(x['health']=='up' for x in targets) else 'DOWN');
+      sys.exit(0 if targets else 1)"
+    capture_as: scrape_status
+    on_fail: continue
+    on_pass: next
+    description: "Confirm Prometheus is successfully scraping insurance targets"
+
+  - name: check_container_running
+    type: shell
+    command: "docker inspect --format '{{.State.Status}}' {{container_name}}"
+    capture_as: container_status
+    expect_exit_code: 0
+    on_fail: goto:restart_container
+    on_pass: next
+    description: "Check if the exporter container is in running state"
+
+  - name: restart_container
+    type: shell
+    command: "docker restart {{container_name}}"
+    timeout_seconds: 30
+    on_fail: goto:notify_oncall
+    on_pass: goto:verify_recovery
+    description: "Restart the claims-api exporter container"
+
+  - name: verify_recovery
+    type: http_check
+    url: http://localhost:8000/metrics
+    expect_status: 200
+    timeout_seconds: 10
+    on_fail: goto:notify_oncall
+    on_pass: goto:notify_resolved
+    description: "Verify service recovered after restart"
+
+  - name: notify_oncall
+    type: notify
+    channel: log
+    message: >
+      🚨 P1 ALERT — claims-api degraded.
+      Error rate: {{claims_error_rate}}
+      Burn rate: {{claims_burn_rate}}
+      Container status: {{container_status}}
+      Scrape status: {{scrape_status}}
+      Automated recovery FAILED — manual intervention required.
+    on_fail: continue
+    on_pass: stop
+    description: "Notify on-call engineer — automated recovery failed"
+
+  - name: notify_resolved
+    type: notify
+    channel: log
+    message: >
+      ✅ RESOLVED — claims-api recovered after container restart.
+      Error rate was: {{claims_error_rate}}
+      Service is now healthy.
+    description: "Notify team that incident was auto-resolved"

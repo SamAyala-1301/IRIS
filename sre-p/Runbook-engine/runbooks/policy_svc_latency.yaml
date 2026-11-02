@@ -1,0 +1,84 @@
+name: Policy Service Latency Degradation
+version: "1.0"
+description: >
+  Runbook for policy-service p99 latency SLO breach.
+  Checks latency trend, error budget status, scans logs
+  for slow query signals, and escalates if threshold exceeded.
+
+variables:
+  service: policy-service
+  prometheus_url: http://localhost:9090
+  latency_slo_ms: 500
+
+steps:
+
+  - name: query_p99_latency
+    type: prometheus_query
+    url: "{{prometheus_url}}"
+    query: 'slo_latency_p99_ms{service="policy-service"}'
+    condition: gt
+    threshold: 500
+    capture_as: policy_latency_p99
+    on_fail: goto:notify_latency_ok
+    on_pass: next
+    description: "Check if p99 latency exceeds 500ms SLO target"
+
+  - name: query_error_budget
+    type: prometheus_query
+    url: "{{prometheus_url}}"
+    query: 'slo_error_budget_remaining_ratio{service="policy-service"}'
+    condition: lt
+    threshold: 0.20
+    capture_as: policy_budget_remaining
+    on_fail: continue
+    on_pass: next
+    description: "Check if error budget is below 20% — indicates prolonged degradation"
+
+  - name: grep_slow_queries
+    type: log_grep
+    source: docker
+    target: insurance-metrics-exporter
+    pattern: "slow|timeout|latency|query.*ms"
+    last_lines: 200
+    capture_as: slow_query_lines
+    on_fail: continue
+    on_pass: next
+    description: "Scan logs for slow query or timeout signals"
+
+  - name: check_prometheus_latency_trend
+    type: shell
+    command: >
+      curl -s "http://localhost:9090/api/v1/query?query=avg_over_time(slo_latency_p99_ms{service='policy-service'}[5m])"
+      | python3 -c "
+      import sys, json
+      d = json.load(sys.stdin)
+      r = d['data']['result']
+      val = float(r[0]['value'][1]) if r else 0
+      print(f'5m avg latency: {val:.1f}ms')
+      sys.exit(0 if val < 500 else 1)
+      "
+    capture_as: latency_trend
+    on_fail: goto:notify_latency_breach
+    on_pass: next
+    description: "Check 5-minute average latency trend"
+
+  - name: notify_latency_breach
+    type: notify
+    channel: log
+    message: >
+      ⚠️  LATENCY BREACH — policy-service p99 exceeds SLO.
+      Current p99: {{policy_latency_p99}}ms (SLO: {{latency_slo_ms}}ms)
+      Error budget remaining: {{policy_budget_remaining}}
+      Trend: {{latency_trend}}
+      Slow query signals: {{slow_query_lines}}
+      Escalating to platform-sre team.
+    description: "Escalate latency breach to on-call"
+
+  - name: notify_latency_ok
+    type: notify
+    channel: log
+    message: >
+      ✅ policy-service latency within SLO target.
+      Current p99: {{policy_latency_p99}}ms (SLO: {{latency_slo_ms}}ms)
+      No action required.
+    description: "Confirm latency is healthy — no action needed"

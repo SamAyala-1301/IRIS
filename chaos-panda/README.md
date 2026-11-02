@@ -1,8 +1,60 @@
-# ChaosPanda 🐼💥
 
-Lightweight chaos engineering platform for AWS Free Tier.
+# ChaosPanda 🐼
 
-## Sprint 1: ✅ COMPLETE
+Kubernetes chaos engine that injects failures, measures recovery (TTD/TTR), and emits structured incident data to the IRIS Incident Intelligence Ecosystem.
+
+---
+
+## 🔗 IRIS Integration
+
+ChaosPanda is the **event producer** in the IRIS ecosystem.
+
+After each experiment, it emits a structured `IrisEvent` to a shared store (`~/.iris/iris.db`). This allows downstream tools like RCA-GPT, CIIA, and the Observability Stack to consume the same incident context.
+
+### Data Flow
+
+ChaosPanda → emits IrisEvent<br>
+↓<br>
+IRIS store (`~/.iris/iris.db`)<br>
+↓<br>
+RCA-GPT → classifies incident<br>
+↓<br>
+CIIA → enriches tickets<br>
+↓<br>
+Obs Stack → visualizes TTD/TTR + trends
+
+### Example Event
+
+```python
+IrisEvent(
+    source      = "chaospanda",
+    event_type  = "pod_kill",
+    severity    = "degraded",
+    ttd_seconds = 1.03,
+    ttr_seconds = 7.09,
+    metadata    = {
+        "deployment": "chaos-target",
+        "namespace" : "default",
+        "pod_killed": "chaos-target-abc123",
+    }
+)
+```
+
+> If IRIS-Core is not installed, ChaosPanda continues to run normally (graceful degradation).
+
+---
+
+## 🚀 What ChaosPanda Does
+
+- Connects to any Kubernetes cluster via kubeconfig
+- Kills pods in a target deployment (fault injection)
+- Measures **TTD (Time to Detect)** and **TTR (Time to Recover)**
+- Stores local experiment history
+- Emits structured events for cross-tool intelligence
+
+---
+
+## 📦 Legacy: Sprint 1 (AWS EKS Setup)
 
 ### What We Built
 - **VPC Infrastructure**: Custom VPC with public/private subnets across 2 AZs

@@ -1,4 +1,21 @@
+# Python bytecode and local environments
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Node dependencies
+node_modules/
+
+# Local secrets and environment files
 .env
+.env.*
+!.env.example
+
+# Local databases and build artifacts
 *.db
+*.sqlite
+*.sqlite3
+build/
