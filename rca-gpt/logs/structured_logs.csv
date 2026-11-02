@@ -1,0 +1,171 @@
+level,timestamp,message,incident_type
+ERROR,12/06/25 10:57,Invalid token,Auth Error
+WARN,12/06/25 10:57,Login failed,Auth Error
+INFO,12/06/25 10:57,Invalid token,Auth Error
+WARN,12/06/25 10:57,Login failed,Auth Error
+WARN,12/06/25 10:57,Login failed,Auth Error
+INFO,12/06/25 10:57,Timeout,Timeout
+INFO,12/06/25 10:57,Login success,Normal
+WARN,12/06/25 10:57,Connection refused,
+INFO,12/06/25 10:57,Login success,Normal
+INFO,12/06/25 10:57,Timeout,Timeout
+INFO,12/06/25 10:57,Login failed,Auth Error
+INFO,12/06/25 10:57,Invalid token,Auth Error
+INFO,12/06/25 10:57,Invalid token,Auth Error
+INFO,12/06/25 10:57,Login success,Normal
+ERROR,12/06/25 10:58,Connection refused,DB error
+INFO,12/06/25 10:58,Login success,Normal
+ERROR,12/06/25 10:58,Connection refused,DB error
+WARN,12/06/25 10:58,Login success,Normal
+INFO,12/06/25 10:58,Invalid token,Auth Error
+INFO,12/06/25 10:58,Login success,Normal
+ERROR,12/06/25 10:58,Timeout,Timeout
+WARN,12/06/25 10:58,Login failed,Auth Error
+INFO,12/06/25 10:58,Invalid token,Auth Error
+ERROR,12/06/25 10:58,Invalid token,Auth Error
+ERROR,12/06/25 10:58,Invalid token,Auth Error
+WARN,12/06/25 10:58,Login success,Normal
+ERROR,12/06/25 10:58,Invalid token,Auth Error
+ERROR,12/06/25 10:58,Invalid token,Auth Error
+INFO,12/06/25 10:58,Connection refused,DB error
+WARN,12/06/25 10:58,Login success,Normal
+WARN,12/06/25 10:58,Connection refused,DB error
+WARN,12/06/25 10:58,Login success,Normal
+ERROR,12/06/25 10:58,Login failed,
+WARN,12/06/25 10:58,Invalid token,
+INFO,12/06/25 10:58,Timeout,Timeout
+INFO,12/06/25 10:58,Login success,Normal
+INFO,12/06/25 10:58,Connection refused,
+INFO,12/06/25 10:58,Login success,
+ERROR,12/06/25 10:58,Invalid token,
+WARN,12/06/25 10:58,Connection refused,
+ERROR,12/06/25 10:58,Connection refused,
+WARN,12/06/25 10:58,Timeout,Timeout
+INFO,12/06/25 10:58,Login success,
+WARN,12/06/25 10:59,Connection refused,
+ERROR,12/06/25 10:59,Timeout,Timeout
+ERROR,12/06/25 10:59,Login success,
+WARN,12/06/25 10:59,Login failed,
+WARN,12/06/25 10:59,Connection refused,
+INFO,12/06/25 10:59,Login failed,
+ERROR,12/06/25 10:59,Login success,
+INFO,12/06/25 10:59,Login failed,
+INFO,12/06/25 10:59,Login failed,
+WARN,12/06/25 10:59,Connection refused,
+ERROR,12/06/25 10:59,Connection refused,
+ERROR,12/06/25 10:59,Login failed,
+INFO,12/06/25 10:59,Timeout,
+ERROR,12/06/25 10:59,Invalid token,
+INFO,12/06/25 10:59,Login failed,
+ERROR,12/06/25 10:59,Timeout,
+ERROR,12/06/25 10:59,Login failed,
+WARN,12/06/25 10:59,Invalid token,
+ERROR,12/06/25 10:59,Login failed,
+INFO,12/06/25 10:59,Login failed,
+WARN,12/06/25 10:59,Login success,
+WARN,12/06/25 10:59,Connection refused,
+INFO,12/06/25 10:59,Login success,
+ERROR,12/06/25 10:59,Connection refused,
+WARN,12/06/25 10:59,Login failed,
+INFO,12/06/25 10:59,Login success,
+INFO,12/06/25 10:59,Invalid token,
+WARN,12/06/25 10:59,Timeout,
+ERROR,12/06/25 10:59,Invalid token,
+ERROR,12/06/25 10:59,Login failed,
+ERROR,12/06/25 11:00,Login success,
+ERROR,12/06/25 11:00,Invalid token,
+ERROR,12/06/25 11:00,Timeout,
+ERROR,12/06/25 11:00,Login success,
+INFO,12/06/25 11:00,Login success,
+ERROR,12/06/25 11:00,Connection refused,
+ERROR,12/06/25 11:00,Login failed,
+INFO,12/06/25 11:00,Invalid token,
+INFO,12/06/25 11:00,Login success,
+ERROR,12/06/25 11:00,Timeout,
+INFO,12/06/25 11:00,Login success,
+INFO,12/06/25 11:00,Invalid token,
+WARN,12/06/25 11:00,Connection refused,
+ERROR,12/06/25 11:00,Login success,
+INFO,12/06/25 11:00,Connection refused,
+ERROR,12/06/25 11:00,Connection refused,
+ERROR,12/06/25 11:00,Invalid token,
+ERROR,12/06/25 11:00,Invalid token,
+WARN,12/06/25 11:00,Connection refused,
+WARN,12/06/25 11:00,Connection refused,
+WARN,12/06/25 11:00,Login success,
+ERROR,12/06/25 11:00,Login failed,
+WARN,12/06/25 11:00,Invalid token,
+WARN,12/06/25 11:00,Connection refused,
+INFO,12/06/25 11:00,Invalid token,
+INFO,12/06/25 11:00,Login success,
+WARN,12/06/25 11:00,Connection refused,
+WARN,12/06/25 11:00,Login failed,
+ERROR,12/06/25 11:00,Connection refused,
+ERROR,12/06/25 11:00,Login success,
+ERROR,12/06/25 11:01,Invalid token,
+WARN,12/06/25 11:01,Timeout,
+ERROR,12/06/25 11:01,Login success,
+INFO,12/06/25 11:01,Connection refused,
+INFO,12/06/25 11:01,Connection refused,
+ERROR,12/06/25 11:01,Connection refused,
+ERROR,12/06/25 11:01,Invalid token,
+INFO,12/06/25 11:01,Login failed,
+INFO,12/06/25 11:01,Login failed,
+WARN,12/06/25 11:01,Timeout,
+ERROR,12/06/25 11:01,Connection refused,
+ERROR,12/06/25 11:01,Invalid token,
+WARN,12/06/25 11:01,Connection refused,
+WARN,12/06/25 11:01,Timeout,
+ERROR,12/06/25 11:01,Timeout,
+INFO,12/06/25 11:01,Invalid token,
+INFO,12/06/25 11:01,Connection refused,
+INFO,12/06/25 11:01,Login success,
+ERROR,12/06/25 11:01,Connection refused,
+WARN,12/06/25 11:01,Invalid token,
+ERROR,12/06/25 11:01,Login failed,
+ERROR,12/06/25 11:01,Invalid token,
+INFO,12/06/25 11:01,Invalid token,
+ERROR,12/06/25 11:01,Invalid token,
+INFO,12/06/25 11:01,Login success,
+INFO,12/06/25 11:01,Invalid token,
+INFO,12/06/25 11:01,Login failed,
+ERROR,12/06/25 11:01,Login failed,
+INFO,12/06/25 11:01,Invalid token,
+INFO,12/06/25 11:02,Connection refused,
+INFO,12/06/25 11:02,Timeout,
+INFO,12/06/25 11:02,Login failed,
+INFO,12/06/25 11:02,Invalid token,
+INFO,12/06/25 11:02,Timeout,
+ERROR,12/06/25 11:02,Invalid token,
+INFO,12/06/25 11:02,Timeout,
+INFO,12/06/25 11:02,Timeout,
+ERROR,12/06/25 11:02,Invalid token,
+ERROR,12/06/25 11:02,Login success,
+WARN,12/06/25 11:02,Invalid token,
+ERROR,12/06/25 11:02,Timeout,
+ERROR,12/06/25 11:02,Connection refused,
+INFO,12/06/25 11:02,Invalid token,
+WARN,12/06/25 11:02,Timeout,
+WARN,12/06/25 11:02,Login success,
+INFO,12/06/25 11:02,Login failed,
+WARN,12/06/25 11:02,Login failed,
+INFO,12/06/25 11:02,Invalid token,
+ERROR,12/06/25 11:02,Invalid token,
+INFO,12/06/25 11:02,Connection refused,
+INFO,12/06/25 11:02,Login failed,
+ERROR,12/06/25 11:02,Invalid token,
+INFO,12/06/25 11:02,Connection refused,
+WARN,12/06/25 11:02,Connection refused,
+ERROR,12/06/25 11:02,Invalid token,
+INFO,12/06/25 11:02,Login success,
+INFO,12/06/25 11:02,Login success,
+ERROR,12/06/25 11:02,Login success,
+WARN,12/06/25 11:02,Connection refused,
+WARN,12/06/25 11:03,Timeout,
+WARN,12/06/25 11:03,Invalid token,
+WARN,12/06/25 11:03,Login failed,
+INFO,12/06/25 11:03,Login success,
+WARN,12/06/25 11:03,Login success,
+ERROR,12/06/25 11:03,Login failed,
+ERROR,12/06/25 11:03,Login failed,
+INFO,12/06/25 11:03,Login success,

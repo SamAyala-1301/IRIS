@@ -1,0 +1,6 @@
+pandas>=2.0.0
+scikit-learn>=1.3.0
+pyyaml>=6.0
+sqlalchemy>=2.0.0
+streamlit>=1.28.0
+iris-core @ file:///Users/sam1301/Documents/Project%20Work/IRIS-Core

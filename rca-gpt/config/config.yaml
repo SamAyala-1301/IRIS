@@ -1,0 +1,43 @@
+# RCA-GPT Configuration
+
+# Logging
+logging:
+  app_log_file: logs/app.log
+  alert_log_file: logs/alert.log
+  log_level: INFO
+
+# Monitoring
+monitoring:
+  check_interval_seconds: 60
+  error_threshold: 3
+  window_size: 50
+  enabled: true
+  store_context: true           # NEW: Store surrounding logs
+  context_window_before: 5      # NEW: Logs to capture before incident
+  context_window_after: 5       # NEW: Logs to capture after incident
+
+# Database
+database:
+  path: data/incidents.db
+  backup_enabled: true
+  backup_interval_hours: 24     # NEW: Auto-backup frequency
+
+# Machine Learning
+ml:
+  model_path: models/classifier.pkl
+  vectorizer_path: models/vectorizer.pkl
+  test_size: 0.2
+  random_state: 42
+  confidence_threshold: 0.7     # NEW: Min confidence for classification
+
+# Data Paths
+data:
+  raw_logs_csv: data/raw/raw_logs.csv
+  training_data_csv: data/training/training_data.csv
+  
+# Feature Flags (for future sprints)
+features:
+  similarity_matching: false
+  pattern_mining: false
+  causality_graph: false
+  auto_resolution: false
